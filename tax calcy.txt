@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tax Calculator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Tax Calculator</h1>
+    <form id="taxForm">
+      <div class="form-group">
+        <label for="income">Gross Annual Income + Extra Income - Deductions (in Lakhs):</label>
+        <input type="number" id="income" name="income" required>
+        <div class="error-icon">!</div>
+      </div>
+      <div class="form-group">
+        <label for="age">Age:</label>
+        <select id="age" name="age" required>
+          <option value="<40">&lt;40</option>
+          <option value="≥40&<60">&ge;40 &lt;60</option>
+          <option value="≥60">&ge;60</option>
+        </select>
+        <div class="error-icon">!</div>
+      </div>
+      <button type="submit">Calculate Tax</button>
+    </form>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Tax Calculation Result</h2>
+      <p id="taxResult"></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+body {
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type="number"],
+select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-icon {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: red;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  border-radius: 5px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('taxForm');
+  const modal = document.getElementById('modal');
+  const taxResult = document.getElementById('taxResult');
+  const errorIcons = document.querySelectorAll('.error-icon');
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    hideErrorIcons();
+
+    const income = parseFloat(form.elements.income.value);
+    const age = form.elements.age.value;
+
+    if (isNaN(income)) {
+      showErrorIcon(form.elements.income, 'Please enter a valid number.');
+      return;
+    }
+
+    if (!age) {
+      showErrorIcon(form.elements.age, 'Age is required.');
+      return;
+    }
+
+    let tax = 0;
+    if (income > 8) {
+      switch (age) {
+        case '<40':
+          tax = 0.3 * (income - 8);
+          break;
+        case '≥40&<60':
+          tax = 0.4 * (income - 8);
+          break;
+        case '≥60':
+          tax = 0.1 * (income - 8);
+          break;
+      }
+    }
+
+    showModal(tax);
+  });
+
+  function showErrorIcon(input, message) {
+    const errorIcon = input.nextElementSibling;
+    errorIcon.style.display = 'inline-block';
+    errorIcon.title = message;
+  }
+
+  function hideErrorIcons() {
+    errorIcons.forEach(function (icon) {
+      icon.style.display = 'none';
+    });
+  }
+
+  function showModal(tax) {
+    const closeButton = modal.querySelector('.close');
+    closeButton.addEventListener('click', function () {
+      modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function (event) {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    });
+
+    modal.style.display = 'block';
+    taxResult.textContent = `Tax to be paid: ${tax} Lakhs`;
+  }
+});
